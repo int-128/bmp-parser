@@ -1,20 +1,18 @@
 #include <iostream>
+#include <string>
 #include <string.h>
 #include "bmpparser.h"
 
 
 int main() {
 
-	int max_file_path_len = 256;
-	char* file_path = new char[256];
+	std::string file_path;
 	uint32_t i;
 
-	std::cout << "Enter input BMP file name: ";
-	fgets(file_path, max_file_path_len, stdin);
-	i = strlen(file_path);
-	file_path[i - 1] = 0;
+	std::cout << "Enter input BMP file name>";
+	std::getline(std::cin, file_path);
 	BMPParser bmp_parser = BMPParser();
-	bmp_parser.load(file_path);
+	bmp_parser.load(file_path.c_str());
 	bmp_parser.print(std::cout);
 
 	uint32_t width = bmp_parser.width(), height = bmp_parser.height();
@@ -22,13 +20,9 @@ int main() {
 	bmp_parser.draw_line(0, height - 1, width - 1, 0, 1);
 	bmp_parser.print(std::cout);
 
-	std::cout << "Enter output BMP file name: ";
-	fgets(file_path, max_file_path_len, stdin);
-	i = strlen(file_path);
-	file_path[i - 1] = 0;
-	bmp_parser.save(file_path);
-
-	delete[] file_path;
+	std::cout << "Enter output BMP file name>";
+	std::getline(std::cin, file_path);
+	bmp_parser.save(file_path.c_str());
 
 	return 0;
 }
