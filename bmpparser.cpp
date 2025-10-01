@@ -83,22 +83,48 @@ void BMPParser::save(const char* file_path) {
 }
 
 void BMPParser::draw_line(uint32_t x1, uint32_t y1, uint32_t x2, uint32_t y2, bool color) {
-	if (x1 > x2) {
+	int32_t dx = x2 - x1;
+	int32_t dy = y2 - y1;
+	if ((dx == 0) && (dy == 0)) {
+		pixel_data->pixel(x1, y1)->rgbRed = 255 * color;
+		pixel_data->pixel(x1, y1)->rgbGreen = 255 * color;
+		pixel_data->pixel(x1, y1)->rgbBlue = 255 * color;
+		return;
+	}
+	bool horizontal = abs(dx) > abs(dy);
+	if ((horizontal && (x1 > x2)) || ((!horizontal) && (y1 > y2))) {
 		uint32_t bf = x1;
 		x1 = x2;
 		x2 = bf;
 		bf = y1;
 		y1 = y2;
 		y2 = bf;
+		dx = -dx;
+		dy = -dy;
 	}
 	uint32_t width = bmp_info.bmiHeader.biWidth;
 	uint32_t height = abs(bmp_info.bmiHeader.biHeight);
-	int32_t dx = x2 - x1;
-	int32_t dy = y2 - y1;
-	double mult = (double)dy / dx;
-	for (uint32_t i = 0; i < dx + 1; ++i) {
-		uint32_t x = x1 + i;
-		uint32_t y = y1 + i * mult;
+	double mult;
+	int32_t dmx;
+	if (horizontal) {
+		mult = (double)dy / dx;
+		dmx = dx;
+	}
+	else {
+		mult = (double)dx / dy;
+		dmx = dy;
+	}
+	for (uint32_t i = 0; i < dmx + 1; ++i) {
+		int32_t j = std::round(i * mult);
+		uint32_t x, y;
+		if (horizontal) {
+			x = x1 + i;
+			y = y1 + j;
+		}
+		else {
+			x = x1 + j;
+			y = y1 + i;
+		}
 		pixel_data->pixel(x, y)->rgbRed = 255 * color;
 		pixel_data->pixel(x, y)->rgbGreen = 255 * color;
 		pixel_data->pixel(x, y)->rgbBlue = 255 * color;

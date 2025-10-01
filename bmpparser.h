@@ -4,6 +4,7 @@
 #include <fstream>
 #include <vector>
 #include <memory>
+#include <cmath>
 
 
 bool is_white(RGBQUAD* pixel);
