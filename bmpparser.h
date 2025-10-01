@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <windows.h>
 #include <fstream>
+#include <vector>
 
 
 bool is_white(RGBQUAD* pixel);
@@ -10,24 +11,11 @@ class PixelData {
 
 private:
 
-	RGBQUAD*** pixel_data = nullptr;
+	std::vector<std::vector<RGBQUAD> > pixel_data;
 	uint16_t color_bit_count;
 	uint32_t width;
 	uint32_t height;
 	bool pixel_order;
-
-	void delete_pixel_data() {
-		if (pixel_data == nullptr)
-			return;
-		for (uint32_t y = 0; y < height; ++y) {
-			for (uint32_t x = 0; x < width; ++x) {
-				delete pixel_data[y][x];
-			}
-			delete[] pixel_data[y];
-		}
-		delete[] pixel_data;
-		pixel_data = nullptr;
-	}
 
 public:
 	
@@ -38,13 +26,8 @@ public:
 		pixel_order = bitmap_info.bmiHeader.biHeight > 0;
 	}
 
-	~PixelData() {
-		delete_pixel_data();
-	}
-
 	void read(std::ifstream &stream) {
-		delete_pixel_data();
-		pixel_data = new RGBQUAD**[height];
+		pixel_data.resize(height);
 		uint32_t alignment = (4 - (width * (color_bit_count >> 3)) % 4) % 4;
 		uint8_t byte;
 		for (uint32_t i = 0, y; i < height; ++i) {
@@ -52,14 +35,13 @@ public:
 				y = height - i - 1;
 			else
 				y = i;
-			pixel_data[y] = new RGBQUAD*[width];
+			pixel_data[y].resize(width);
 			for (uint32_t x = 0; x < width; ++x) {
-				pixel_data[y][x] = new RGBQUAD;
-				stream >> pixel_data[y][x]->rgbBlue;
-				stream >> pixel_data[y][x]->rgbGreen;
-				stream >> pixel_data[y][x]->rgbRed;
+				stream >> pixel_data[y][x].rgbBlue;
+				stream >> pixel_data[y][x].rgbGreen;
+				stream >> pixel_data[y][x].rgbRed;
 				if (color_bit_count == 32)
-					stream >> pixel_data[y][x]->rgbReserved;
+					stream >> pixel_data[y][x].rgbReserved;
 			}
 			for (uint32_t j = 0; j < alignment; ++j)
 				stream >> byte;
@@ -75,11 +57,11 @@ public:
 			else
 				y = i;
 			for (uint32_t x = 0; x < width; ++x) {
-				stream << pixel_data[y][x]->rgbBlue;
-				stream << pixel_data[y][x]->rgbGreen;
-				stream << pixel_data[y][x]->rgbRed;
+				stream << pixel_data[y][x].rgbBlue;
+				stream << pixel_data[y][x].rgbGreen;
+				stream << pixel_data[y][x].rgbRed;
 				if (color_bit_count == 32)
-					stream << pixel_data[y][x]->rgbReserved;
+					stream << pixel_data[y][x].rgbReserved;
 			}
 			for (uint32_t j = 0; j < alignment; ++j)
 				stream << byte;
@@ -87,7 +69,7 @@ public:
 	}
 
 	RGBQUAD* pixel(uint32_t x, uint32_t y) {
-		return pixel_data[y][x];
+		return &pixel_data[y][x];
 	}
 };
 
