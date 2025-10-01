@@ -9,9 +9,6 @@
 bool is_white(RGBQUAD* pixel);
 
 
-uint32_t get_alignment(uint32_t width, uint16_t color_bit_count);
-
-
 class PixelData {
 
 private:

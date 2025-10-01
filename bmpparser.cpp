@@ -6,11 +6,6 @@ bool is_white(RGBQUAD* pixel) {
 }
 
 
-uint32_t get_alignment(uint32_t width, uint16_t color_bit_count) {
-	return (4 - (width * (color_bit_count >> 3)) % 4) % 4;
-}
-
-
 PixelData::PixelData(BITMAPINFO& bitmap_info) {
 	color_bit_count = bitmap_info.bmiHeader.biBitCount;
 	width = bitmap_info.bmiHeader.biWidth;
